@@ -6,10 +6,10 @@ This mod also act as a hard nerf to traditional iron farms.
 
 ## Features
 
-- **Dynamic Conscription:** When a villager panics (e.g., spots a zombie), they will search a 10-block radius for candidates to draft into the village guard.
-- **Targeted Drafting:** Only unemployed villagers (`none`) and `nitwit` villagers can be conscripted.
-- **Vanilla Cooldown Integration:** Conscription utilizes the vanilla `GOLEM_DETECTED_RECENTLY` memory module, applying a 30-second (600 tick) cooldown to nearby villagers to prevent accidentally draft every jobless person into local militia.
-- **Anti-Iron Farm (Feature):** By replacing the panic-spawn mechanic, this mod effectively disables traditional panic-based Iron Farms.
+- **Dynamic Conscription:** When a villager panics, they will search a 10-block radius for candidates to draft into the village guard.
+- **Targeted Drafting:** Only unemployed villagers and villagers can be conscripted.
+- **Vanilla Cooldown Integration:** Conscription utilizes the vanilla `GOLEM_DETECTED_RECENTLY` memory module, applying a 30-second cooldown to nearby villagers to prevent accidentally draft every jobless person into local militia.
+- **Anti-Iron Farm:** By replacing the panic-spawn mechanic, this mod effectively disables traditional panic-based Iron Farms.
 
 ## Installation
 
