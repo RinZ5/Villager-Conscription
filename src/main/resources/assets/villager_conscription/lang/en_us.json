@@ -1,0 +1,13 @@
+{
+  "itemGroup.villager_conscription": "Example Mod Tab",
+  "block.villager_conscription.example_block": "Example Block",
+  "item.villager_conscription.example_item": "Example Item",
+
+  "villager_conscription.configuration.title": "Villager Conscription Configs",
+  "villager_conscription.configuration.section.villager_conscription.common.toml": "Villager Conscription Configs",
+  "villager_conscription.configuration.section.villager_conscription.common.toml.title": "Villager Conscription Configs",
+  "villager_conscription.configuration.items": "Item List",
+  "villager_conscription.configuration.logDirtBlock": "Log Dirt Block",
+  "villager_conscription.configuration.magicNumberIntroduction": "Magic Number Text",
+  "villager_conscription.configuration.magicNumber": "Magic Number"
+}

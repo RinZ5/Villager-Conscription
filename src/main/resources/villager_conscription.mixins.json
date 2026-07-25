@@ -1,0 +1,14 @@
+{
+  "require": true,
+  "package": "com.rin.villager_conscription.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "villager_conscription.refmap.json",
+  "mixins": ["VillagerSummonGolemMixin"],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
