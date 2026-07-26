@@ -47,7 +47,8 @@ public abstract class VillagerSummonGolemMixin {
             ServerLevel world,
             long time,
             int requiredCount,
-            CallbackInfo ci) {
+            CallbackInfo ci
+    ) {
         double villageSearchRadius = VILLAGE_SEARCH_RADIUS.get();
         double villageSearchHeight = VILLAGE_SEARCH_HEIGHT.get();
 
