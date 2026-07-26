@@ -43,9 +43,11 @@ public abstract class VillagerSummonGolemMixin {
     private static final Set<String> ALLOWED_PROFS = Set.of("none", "nitwit");
 
     @Inject(method = "spawnGolemIfNeeded", at = @At("HEAD"), cancellable = true)
-    private void villager_conscription$redirectGolemToGuard(ServerLevel world, long time,
-            int requiredCount, CallbackInfo ci) {
-
+    private void villager_conscription$redirectGolemToGuard(
+            ServerLevel world,
+            long time,
+            int requiredCount,
+            CallbackInfo ci) {
         double villageSearchRadius = VILLAGE_SEARCH_RADIUS.get();
         double villageSearchHeight = VILLAGE_SEARCH_HEIGHT.get();
 
@@ -59,10 +61,16 @@ public abstract class VillagerSummonGolemMixin {
             return;
         }
 
-        AABB villageBounds = self.getBoundingBox().inflate(villageSearchRadius, villageSearchHeight,
-                villageSearchRadius);
-        List<Villager> allNearbyVillagers =
-                world.getEntitiesOfClass(Villager.class, villageBounds, v -> true);
+        AABB villageBounds = self.getBoundingBox().inflate(
+                villageSearchRadius,
+                villageSearchHeight,
+                villageSearchRadius
+        );
+        List<Villager> allNearbyVillagers = world.getEntitiesOfClass(
+                Villager.class,
+                villageBounds,
+                v -> true
+        );
 
         List<Villager> candidates = filterCandidates(allNearbyVillagers, self);
 
@@ -81,8 +89,11 @@ public abstract class VillagerSummonGolemMixin {
     private boolean hasGuardsNearby(ServerLevel world, Villager self) {
         double guardSearchRadius = GUARD_SEARCH_RADIUS.get();
 
-        AABB searchBox = self.getBoundingBox().inflate(guardSearchRadius, guardSearchRadius / 2.0,
-                guardSearchRadius);
+        AABB searchBox = self.getBoundingBox().inflate(
+                guardSearchRadius,
+                guardSearchRadius / 2.0,
+                guardSearchRadius
+        );
         List<Guard> existingGuards = world.getEntitiesOfClass(Guard.class, searchBox, g -> true);
         return !existingGuards.isEmpty();
     }
@@ -98,8 +109,13 @@ public abstract class VillagerSummonGolemMixin {
     private void applyCooldowns(List<Villager> villagers) {
         long cooldownTicks = COOLDOWN_TICKS.get();
 
-        villagers.stream().limit(5).forEach(v -> v.getBrain().setMemoryWithExpiry(
-                MemoryModuleType.GOLEM_DETECTED_RECENTLY, true, cooldownTicks));
+        villagers.stream().limit(5).forEach(
+                v -> v.getBrain().setMemoryWithExpiry(
+                        MemoryModuleType.GOLEM_DETECTED_RECENTLY,
+                        true,
+                        cooldownTicks
+                )
+        );
     }
 
     @Unique
@@ -154,11 +170,25 @@ public abstract class VillagerSummonGolemMixin {
 
     @Unique
     private static void playConversionEffects(Guard guard, ServerLevel world) {
-        world.playSound(null, guard.blockPosition(), SoundEvents.ARMOR_EQUIP_IRON.value(),
-                SoundSource.NEUTRAL, 1.0F, 1.0F);
+        world.playSound(
+                null,
+                guard.blockPosition(),
+                SoundEvents.ARMOR_EQUIP_IRON.value(),
+                SoundSource.NEUTRAL,
+                1.0F,
+                1.0F
+        );
 
-        world.sendParticles(ParticleTypes.SCRAPE, guard.getX(), guard.getY() + 1.0, guard.getZ(),
-                15, 0.3, 0.5, 0.3, 0.1);
+        world.sendParticles(
+                ParticleTypes.SCRAPE,
+                guard.getX(),
+                guard.getY() + 1.0,
+                guard.getZ(),
+                15,
+                0.3,
+                0.5,
+                0.3,
+                0.1
+        );
     }
 }
-

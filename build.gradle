@@ -3,6 +3,37 @@ plugins {
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.142'
     id 'idea'
+    id 'java'
+    id 'checkstyle'
+    id 'com.diffplug.spotless' version '6.25.0'
+}
+
+spotless {
+    java {
+        target 'src/*/java/**/*.java'
+        eclipse().configFile('config/formatter.xml')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+checkstyle {
+    toolVersion = '10.12.5'
+    configFile = file("${rootDir}/config/checkstyle.xml")
+    maxErrors = 0
+    maxWarnings = 0
+}
+
+tasks.withType(Checkstyle).configureEach {
+    reports {
+        xml.required = false
+        html.required = true
+    }
+}
+
+tasks.named('build') {
+    dependsOn 'spotlessCheck', 'checkstyleMain', 'checkstyleTest'
 }
 
 tasks.named('wrapper', Wrapper).configure {
