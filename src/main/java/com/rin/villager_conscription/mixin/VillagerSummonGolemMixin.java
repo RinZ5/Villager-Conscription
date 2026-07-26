@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -148,7 +149,7 @@ public abstract class VillagerSummonGolemMixin {
         villager.discard();
         world.addFreshEntity(guard);
 
-        playConversionEffects(guard, world);
+        playConversionEffects(guard, world, config);
     }
 
     @Unique
@@ -178,26 +179,41 @@ public abstract class VillagerSummonGolemMixin {
     }
 
     @Unique
-    private static void playConversionEffects(Guard guard, ServerLevel world) {
-        world.playSound(
-            null,
-            guard.blockPosition(),
-            SoundEvents.ARMOR_EQUIP_IRON.value(),
-            SoundSource.NEUTRAL,
-            1.0F,
-            1.0F
-        );
+    private static void playConversionEffects(
+        Guard guard,
+        ServerLevel world,
+        ProfessionGearConfig config
+    ) {
+        ResourceLocation soundId = ResourceLocation.parse(config.getConversionEffect().getSound());
+        var sound = BuiltInRegistries.SOUND_EVENT.get(soundId);
 
-        world.sendParticles(
-            ParticleTypes.SCRAPE,
-            guard.getX(),
-            guard.getY() + 1.0,
-            guard.getZ(),
-            15,
-            0.3,
-            0.5,
-            0.3,
-            0.1
-        );
+        if (sound != null) {
+            world.playSound(
+                null,
+                guard.blockPosition(),
+                sound,
+                SoundSource.NEUTRAL,
+                1.0F,
+                1.0F
+            );
+        }
+
+        ResourceLocation particleId = ResourceLocation
+            .parse(config.getConversionEffect().getParticle());
+        var particleType = BuiltInRegistries.PARTICLE_TYPE.get(particleId);
+
+        if (particleType instanceof SimpleParticleType simpleParticle) {
+            world.sendParticles(
+                simpleParticle,
+                guard.getX(),
+                guard.getY() + 1.0,
+                guard.getZ(),
+                config.getConversionEffect().getParticleCount(),
+                0.3,
+                0.5,
+                0.3,
+                0.1
+            );
+        }
     }
 }

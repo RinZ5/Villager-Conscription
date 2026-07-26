@@ -9,6 +9,9 @@ public class ProfessionGearConfig {
     @SerializedName("drop_chance")
     private double dropChance = 0.8;
 
+    @SerializedName("conversion_effect")
+    private ConversionEffect conversionEffect = new ConversionEffect();
+
     public String getProfession() {
         return profession;
     }
@@ -19,6 +22,10 @@ public class ProfessionGearConfig {
 
     public double getDropChance() {
         return dropChance;
+    }
+
+    public ConversionEffect getConversionEffect() {
+        return conversionEffect;
     }
 
     public static class Equipment {
@@ -51,6 +58,26 @@ public class ProfessionGearConfig {
 
         public String getFeet() {
             return feet;
+        }
+    }
+
+    public static class ConversionEffect {
+        private String sound = "minecraft:item.armor.equip_iron";
+        private String particle = "minecraft:scrape";
+
+        @SerializedName("particle_count")
+        private int particleCount = 15;
+
+        public String getSound() {
+            return sound;
+        }
+
+        public String getParticle() {
+            return particle;
+        }
+
+        public int getParticleCount() {
+            return particleCount;
         }
     }
 }

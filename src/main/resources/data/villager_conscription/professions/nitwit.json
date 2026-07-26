@@ -8,5 +8,10 @@
     "legs": "",
     "feet": ""
   },
-  "drop_chance": 0.8
+  "drop_chance": 0.8,
+  "conversion_effect": {
+    "sound": "minecraft:entity.villager.no",
+    "particle": "minecraft:angry_villager",
+    "particle_count": 10
+  }
 }
