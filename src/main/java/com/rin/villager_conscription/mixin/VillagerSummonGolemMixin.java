@@ -106,7 +106,7 @@ public abstract class VillagerSummonGolemMixin {
     private void applyCooldowns(List<Villager> villagers) {
         long cooldownTicks = COOLDOWN_TICKS.get();
 
-        villagers.stream().limit(5).forEach(
+        villagers.stream().forEach(
             v -> v.getBrain().setMemoryWithExpiry(
                 MemoryModuleType.GOLEM_DETECTED_RECENTLY,
                 true,
