@@ -1,7 +1,6 @@
 package com.rin.villager_conscription.mixin;
 
 import java.util.List;
-import java.util.Set;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
