@@ -50,6 +50,10 @@ public abstract class VillagerSummonGolemMixin {
 
         Villager self = (Villager) (Object) this;
 
+        if (self.getBrain().hasMemoryValue(MemoryModuleType.GOLEM_DETECTED_RECENTLY)) {
+            return;
+        }
+
         if (!self.getBrain().isActive(Activity.PANIC) || hasGuardsNearby(world, self)) {
             return;
         }
