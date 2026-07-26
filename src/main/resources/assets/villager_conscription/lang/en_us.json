@@ -6,8 +6,20 @@
   "villager_conscription.configuration.title": "Villager Conscription Configs",
   "villager_conscription.configuration.section.villager_conscription.common.toml": "Villager Conscription Configs",
   "villager_conscription.configuration.section.villager_conscription.common.toml.title": "Villager Conscription Configs",
-  "villager_conscription.configuration.items": "Item List",
-  "villager_conscription.configuration.logDirtBlock": "Log Dirt Block",
-  "villager_conscription.configuration.magicNumberIntroduction": "Magic Number Text",
-  "villager_conscription.configuration.magicNumber": "Magic Number"
+
+  "villager_conscription.configuration.General": "General Settings",
+  "villager_conscription.configuration.Equipment": "Guard Equipment",
+
+  "villager_conscription.configuration.guardSearchRadius": "Guard Search Radius",
+  "villager_conscription.configuration.villageSearchRadius": "Village Search Radius",
+  "villager_conscription.configuration.villageSearchHeight": "Village Search Height",
+  "villager_conscription.configuration.cooldownTicks": "Cooldown (Ticks)",
+  "villager_conscription.configuration.guardDropRate": "Equipment Drop Rate",
+
+  "villager_conscription.configuration.headItem": "Helmet Item ID",
+  "villager_conscription.configuration.chestItem": "Chestplate Item ID",
+  "villager_conscription.configuration.legsItem": "Leggings Item ID",
+  "villager_conscription.configuration.feetItem": "Boots Item ID",
+  "villager_conscription.configuration.mainhandItem": "Mainhand Weapon ID",
+  "villager_conscription.configuration.offhandItem": "Offhand Item ID"
 }
