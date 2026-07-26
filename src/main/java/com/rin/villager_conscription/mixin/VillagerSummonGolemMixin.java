@@ -7,10 +7,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -96,13 +94,12 @@ public abstract class VillagerSummonGolemMixin {
 
     @Unique
     private List<Villager> filterCandidates(List<Villager> villagers, Villager self) {
-        return villagers.stream().filter(v -> !v.isBaby()).filter(v -> v != self)
-            .filter(v -> {
-                ResourceLocation profId = BuiltInRegistries.VILLAGER_PROFESSION
-                    .getKey(v.getVillagerData().getProfession());
-                return ProfessionReloadListener.hasConfig(profId);
-            })
-            .toList();
+        return villagers.stream().filter(v -> !v.isBaby()).filter(v -> v != self).filter(v -> {
+            ResourceLocation profId = BuiltInRegistries.VILLAGER_PROFESSION.getKey(
+                v.getVillagerData().getProfession()
+            );
+            return ProfessionReloadListener.hasConfig(profId);
+        }).toList();
     }
 
     @Unique
@@ -120,8 +117,9 @@ public abstract class VillagerSummonGolemMixin {
 
     @Unique
     private static void convertVillagerToGuard(Villager villager, ServerLevel world) {
-        ResourceLocation profId = BuiltInRegistries.VILLAGER_PROFESSION
-            .getKey(villager.getVillagerData().getProfession());
+        ResourceLocation profId = BuiltInRegistries.VILLAGER_PROFESSION.getKey(
+            villager.getVillagerData().getProfession()
+        );
         ProfessionGearConfig config = ProfessionReloadListener.getConfig(profId);
 
         if (config == null) {
@@ -188,18 +186,12 @@ public abstract class VillagerSummonGolemMixin {
         var sound = BuiltInRegistries.SOUND_EVENT.get(soundId);
 
         if (sound != null) {
-            world.playSound(
-                null,
-                guard.blockPosition(),
-                sound,
-                SoundSource.NEUTRAL,
-                1.0F,
-                1.0F
-            );
+            world.playSound(null, guard.blockPosition(), sound, SoundSource.NEUTRAL, 1.0F, 1.0F);
         }
 
-        ResourceLocation particleId = ResourceLocation
-            .parse(config.getConversionEffect().getParticle());
+        ResourceLocation particleId = ResourceLocation.parse(
+            config.getConversionEffect().getParticle()
+        );
         var particleType = BuiltInRegistries.PARTICLE_TYPE.get(particleId);
 
         if (particleType instanceof SimpleParticleType simpleParticle) {
