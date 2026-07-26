@@ -50,6 +50,10 @@ public abstract class VillagerSummonGolemMixin {
 
         Villager self = (Villager) (Object) this;
 
+        if (self.getBrain().hasMemoryValue(MemoryModuleType.GOLEM_DETECTED_RECENTLY)) {
+            return;
+        }
+
         if (!self.getBrain().isActive(Activity.PANIC) || hasGuardsNearby(world, self)) {
             return;
         }
@@ -106,7 +110,7 @@ public abstract class VillagerSummonGolemMixin {
     private void applyCooldowns(List<Villager> villagers) {
         long cooldownTicks = COOLDOWN_TICKS.get();
 
-        villagers.stream().limit(5).forEach(
+        villagers.stream().forEach(
             v -> v.getBrain().setMemoryWithExpiry(
                 MemoryModuleType.GOLEM_DETECTED_RECENTLY,
                 true,
