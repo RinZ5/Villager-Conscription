@@ -1,0 +1,17 @@
+{
+  "profession": "minecraft:nitwit",
+  "equipment": {
+    "mainhand": "minecraft:iron_sword",
+    "offhand": "",
+    "head": "",
+    "chest": "",
+    "legs": "",
+    "feet": ""
+  },
+  "drop_chance": 0.8,
+  "conversion_effect": {
+    "sound": "minecraft:entity.villager.no",
+    "particle": "minecraft:angry_villager",
+    "particle_count": 10
+  }
+}

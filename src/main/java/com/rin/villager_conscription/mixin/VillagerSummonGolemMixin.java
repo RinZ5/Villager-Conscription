@@ -1,7 +1,6 @@
 package com.rin.villager_conscription.mixin;
 
 import java.util.List;
-import java.util.Set;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -9,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -24,30 +24,24 @@ import net.neoforged.fml.ModList;
 import tallestegg.guardvillagers.GuardEntityType;
 import tallestegg.guardvillagers.common.entities.Guard;
 
+import com.rin.villager_conscription.data.ProfessionGearConfig;
+import com.rin.villager_conscription.data.ProfessionReloadListener;
+import com.rin.villager_conscription.data.ProfessionGearConfig.Equipment;
+
 import static com.rin.villager_conscription.VillagerConscriptionConfig.GUARD_SEARCH_RADIUS;
 import static com.rin.villager_conscription.VillagerConscriptionConfig.VILLAGE_SEARCH_RADIUS;
 import static com.rin.villager_conscription.VillagerConscriptionConfig.VILLAGE_SEARCH_HEIGHT;
 import static com.rin.villager_conscription.VillagerConscriptionConfig.COOLDOWN_TICKS;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.GUARD_DROP_RATE;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.HEAD_ITEM;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.CHEST_ITEM;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.LEGS_ITEM;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.FEET_ITEM;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.MAINHAND_ITEM;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.OFFHAND_ITEM;
 
 @Mixin(Villager.class)
 public abstract class VillagerSummonGolemMixin {
 
-    @Unique
-    private static final Set<String> ALLOWED_PROFS = Set.of("none", "nitwit");
-
     @Inject(method = "spawnGolemIfNeeded", at = @At("HEAD"), cancellable = true)
     private void villager_conscription$redirectGolemToGuard(
-            ServerLevel world,
-            long time,
-            int requiredCount,
-            CallbackInfo ci
+        ServerLevel world,
+        long time,
+        int requiredCount,
+        CallbackInfo ci
     ) {
         double villageSearchRadius = VILLAGE_SEARCH_RADIUS.get();
         double villageSearchHeight = VILLAGE_SEARCH_HEIGHT.get();
@@ -63,14 +57,15 @@ public abstract class VillagerSummonGolemMixin {
         }
 
         AABB villageBounds = self.getBoundingBox().inflate(
-                villageSearchRadius,
-                villageSearchHeight,
-                villageSearchRadius
+            villageSearchRadius,
+            villageSearchHeight,
+            villageSearchRadius
         );
+
         List<Villager> allNearbyVillagers = world.getEntitiesOfClass(
-                Villager.class,
-                villageBounds,
-                v -> true
+            Villager.class,
+            villageBounds,
+            v -> true
         );
 
         List<Villager> candidates = filterCandidates(allNearbyVillagers, self);
@@ -91,9 +86,9 @@ public abstract class VillagerSummonGolemMixin {
         double guardSearchRadius = GUARD_SEARCH_RADIUS.get();
 
         AABB searchBox = self.getBoundingBox().inflate(
-                guardSearchRadius,
-                guardSearchRadius / 2.0,
-                guardSearchRadius
+            guardSearchRadius,
+            guardSearchRadius / 2.0,
+            guardSearchRadius
         );
         List<Guard> existingGuards = world.getEntitiesOfClass(Guard.class, searchBox, g -> true);
         return !existingGuards.isEmpty();
@@ -102,8 +97,12 @@ public abstract class VillagerSummonGolemMixin {
     @Unique
     private List<Villager> filterCandidates(List<Villager> villagers, Villager self) {
         return villagers.stream().filter(v -> !v.isBaby()).filter(v -> v != self)
-                .filter(v -> ALLOWED_PROFS.contains(v.getVillagerData().getProfession().name()))
-                .toList();
+            .filter(v -> {
+                ResourceLocation profId = BuiltInRegistries.VILLAGER_PROFESSION
+                    .getKey(v.getVillagerData().getProfession());
+                return ProfessionReloadListener.hasConfig(profId);
+            })
+            .toList();
     }
 
     @Unique
@@ -111,16 +110,24 @@ public abstract class VillagerSummonGolemMixin {
         long cooldownTicks = COOLDOWN_TICKS.get();
 
         villagers.stream().limit(5).forEach(
-                v -> v.getBrain().setMemoryWithExpiry(
-                        MemoryModuleType.GOLEM_DETECTED_RECENTLY,
-                        true,
-                        cooldownTicks
-                )
+            v -> v.getBrain().setMemoryWithExpiry(
+                MemoryModuleType.GOLEM_DETECTED_RECENTLY,
+                true,
+                cooldownTicks
+            )
         );
     }
 
     @Unique
     private static void convertVillagerToGuard(Villager villager, ServerLevel world) {
+        ResourceLocation profId = BuiltInRegistries.VILLAGER_PROFESSION
+            .getKey(villager.getVillagerData().getProfession());
+        ProfessionGearConfig config = ProfessionReloadListener.getConfig(profId);
+
+        if (config == null) {
+            return;
+        }
+
         Guard guard = GuardEntityType.GUARD.get().create(world);
 
         if (guard == null) {
@@ -133,7 +140,7 @@ public abstract class VillagerSummonGolemMixin {
         guard.setCustomName(villager.getCustomName());
         guard.setCustomNameVisible(villager.isCustomNameVisible());
 
-        equipGuard(guard);
+        equipGuard(guard, config);
 
         villager.releasePoi(MemoryModuleType.HOME);
         villager.releasePoi(MemoryModuleType.JOB_SITE);
@@ -142,7 +149,7 @@ public abstract class VillagerSummonGolemMixin {
         villager.discard();
         world.addFreshEntity(guard);
 
-        playConversionEffects(guard, world);
+        playConversionEffects(guard, world, config);
     }
 
     @Unique
@@ -154,42 +161,59 @@ public abstract class VillagerSummonGolemMixin {
     }
 
     @Unique
-    private static void equipGuard(Guard guard) {
-        float guardDropRate = GUARD_DROP_RATE.get().floatValue();
+    private static void equipGuard(Guard guard, ProfessionGearConfig config) {
+        float equipmentDropRate = (float) config.getDropChance();
 
         for (EquipmentSlot slot : EquipmentSlot.values()) {
-            guard.setDropChance(slot, guardDropRate);
+            guard.setDropChance(slot, equipmentDropRate);
         }
 
-        guard.setItemSlot(EquipmentSlot.HEAD, getConfigItem(HEAD_ITEM.get()));
-        guard.setItemSlot(EquipmentSlot.CHEST, getConfigItem(CHEST_ITEM.get()));
-        guard.setItemSlot(EquipmentSlot.LEGS, getConfigItem(LEGS_ITEM.get()));
-        guard.setItemSlot(EquipmentSlot.FEET, getConfigItem(FEET_ITEM.get()));
-        guard.setItemSlot(EquipmentSlot.MAINHAND, getConfigItem(MAINHAND_ITEM.get()));
-        guard.setItemSlot(EquipmentSlot.OFFHAND, getConfigItem(OFFHAND_ITEM.get()));
+        Equipment professionEquipment = config.getEquipment();
+
+        guard.setItemSlot(EquipmentSlot.HEAD, getConfigItem(professionEquipment.getHead()));
+        guard.setItemSlot(EquipmentSlot.CHEST, getConfigItem(professionEquipment.getChest()));
+        guard.setItemSlot(EquipmentSlot.LEGS, getConfigItem(professionEquipment.getLegs()));
+        guard.setItemSlot(EquipmentSlot.FEET, getConfigItem(professionEquipment.getFeet()));
+        guard.setItemSlot(EquipmentSlot.MAINHAND, getConfigItem(professionEquipment.getMainhand()));
+        guard.setItemSlot(EquipmentSlot.OFFHAND, getConfigItem(professionEquipment.getOffhand()));
     }
 
     @Unique
-    private static void playConversionEffects(Guard guard, ServerLevel world) {
-        world.playSound(
+    private static void playConversionEffects(
+        Guard guard,
+        ServerLevel world,
+        ProfessionGearConfig config
+    ) {
+        ResourceLocation soundId = ResourceLocation.parse(config.getConversionEffect().getSound());
+        var sound = BuiltInRegistries.SOUND_EVENT.get(soundId);
+
+        if (sound != null) {
+            world.playSound(
                 null,
                 guard.blockPosition(),
-                SoundEvents.ARMOR_EQUIP_IRON.value(),
+                sound,
                 SoundSource.NEUTRAL,
                 1.0F,
                 1.0F
-        );
+            );
+        }
 
-        world.sendParticles(
-                ParticleTypes.SCRAPE,
+        ResourceLocation particleId = ResourceLocation
+            .parse(config.getConversionEffect().getParticle());
+        var particleType = BuiltInRegistries.PARTICLE_TYPE.get(particleId);
+
+        if (particleType instanceof SimpleParticleType simpleParticle) {
+            world.sendParticles(
+                simpleParticle,
                 guard.getX(),
                 guard.getY() + 1.0,
                 guard.getZ(),
-                15,
+                config.getConversionEffect().getParticleCount(),
                 0.3,
                 0.5,
                 0.3,
                 0.1
-        );
+            );
+        }
     }
 }
