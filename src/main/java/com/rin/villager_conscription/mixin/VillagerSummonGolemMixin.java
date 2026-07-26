@@ -24,23 +24,16 @@ import net.neoforged.fml.ModList;
 import tallestegg.guardvillagers.GuardEntityType;
 import tallestegg.guardvillagers.common.entities.Guard;
 
+import com.rin.villager_conscription.data.ProfessionGearConfig;
+import com.rin.villager_conscription.data.ProfessionReloadListener;
+
 import static com.rin.villager_conscription.VillagerConscriptionConfig.GUARD_SEARCH_RADIUS;
 import static com.rin.villager_conscription.VillagerConscriptionConfig.VILLAGE_SEARCH_RADIUS;
 import static com.rin.villager_conscription.VillagerConscriptionConfig.VILLAGE_SEARCH_HEIGHT;
 import static com.rin.villager_conscription.VillagerConscriptionConfig.COOLDOWN_TICKS;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.GUARD_DROP_RATE;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.HEAD_ITEM;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.CHEST_ITEM;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.LEGS_ITEM;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.FEET_ITEM;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.MAINHAND_ITEM;
-import static com.rin.villager_conscription.VillagerConscriptionConfig.OFFHAND_ITEM;
 
 @Mixin(Villager.class)
 public abstract class VillagerSummonGolemMixin {
-
-    @Unique
-    private static final Set<String> ALLOWED_PROFS = Set.of("none", "nitwit");
 
     @Inject(method = "spawnGolemIfNeeded", at = @At("HEAD"), cancellable = true)
     private void villager_conscription$redirectGolemToGuard(
@@ -67,6 +60,7 @@ public abstract class VillagerSummonGolemMixin {
                 villageSearchHeight,
                 villageSearchRadius
         );
+
         List<Villager> allNearbyVillagers = world.getEntitiesOfClass(
                 Villager.class,
                 villageBounds,
@@ -102,7 +96,11 @@ public abstract class VillagerSummonGolemMixin {
     @Unique
     private List<Villager> filterCandidates(List<Villager> villagers, Villager self) {
         return villagers.stream().filter(v -> !v.isBaby()).filter(v -> v != self)
-                .filter(v -> ALLOWED_PROFS.contains(v.getVillagerData().getProfession().name()))
+                .filter(v -> {
+                    ResourceLocation profId = BuiltInRegistries.VILLAGER_PROFESSION
+                            .getKey(v.getVillagerData().getProfession());
+                    return ProfessionReloadListener.hasConfig(profId);
+                })
                 .toList();
     }
 
@@ -121,6 +119,14 @@ public abstract class VillagerSummonGolemMixin {
 
     @Unique
     private static void convertVillagerToGuard(Villager villager, ServerLevel world) {
+        ResourceLocation profId = BuiltInRegistries.VILLAGER_PROFESSION
+                .getKey(villager.getVillagerData().getProfession());
+        ProfessionGearConfig config = ProfessionReloadListener.getConfig(profId);
+
+        if (config == null) {
+            return;
+        }
+
         Guard guard = GuardEntityType.GUARD.get().create(world);
 
         if (guard == null) {
@@ -133,7 +139,7 @@ public abstract class VillagerSummonGolemMixin {
         guard.setCustomName(villager.getCustomName());
         guard.setCustomNameVisible(villager.isCustomNameVisible());
 
-        equipGuard(guard);
+        equipGuard(guard, config);
 
         villager.releasePoi(MemoryModuleType.HOME);
         villager.releasePoi(MemoryModuleType.JOB_SITE);
@@ -154,19 +160,22 @@ public abstract class VillagerSummonGolemMixin {
     }
 
     @Unique
-    private static void equipGuard(Guard guard) {
-        float guardDropRate = GUARD_DROP_RATE.get().floatValue();
+    private static void equipGuard(Guard guard, ProfessionGearConfig config) {
+        float equipmentDropRate = (float) config.getDropChance();
 
         for (EquipmentSlot slot : EquipmentSlot.values()) {
-            guard.setDropChance(slot, guardDropRate);
+            guard.setDropChance(slot, equipmentDropRate);
         }
 
-        guard.setItemSlot(EquipmentSlot.HEAD, getConfigItem(HEAD_ITEM.get()));
-        guard.setItemSlot(EquipmentSlot.CHEST, getConfigItem(CHEST_ITEM.get()));
-        guard.setItemSlot(EquipmentSlot.LEGS, getConfigItem(LEGS_ITEM.get()));
-        guard.setItemSlot(EquipmentSlot.FEET, getConfigItem(FEET_ITEM.get()));
-        guard.setItemSlot(EquipmentSlot.MAINHAND, getConfigItem(MAINHAND_ITEM.get()));
-        guard.setItemSlot(EquipmentSlot.OFFHAND, getConfigItem(OFFHAND_ITEM.get()));
+        guard.setItemSlot(EquipmentSlot.HEAD, getConfigItem(config.getEquipment().getHead()));
+        guard.setItemSlot(EquipmentSlot.CHEST, getConfigItem(config.getEquipment().getChest()));
+        guard.setItemSlot(EquipmentSlot.LEGS, getConfigItem(config.getEquipment().getLegs()));
+        guard.setItemSlot(EquipmentSlot.FEET, getConfigItem(config.getEquipment().getFeet()));
+        guard.setItemSlot(
+                EquipmentSlot.MAINHAND,
+                getConfigItem(config.getEquipment().getMainhand())
+        );
+        guard.setItemSlot(EquipmentSlot.OFFHAND, getConfigItem(config.getEquipment().getOffhand()));
     }
 
     @Unique

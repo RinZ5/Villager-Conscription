@@ -1,0 +1,12 @@
+{
+  "profession": "minecraft:none",
+  "equipment": {
+    "mainhand": "minecraft:iron_sword",
+    "offhand": "minecraft:shield",
+    "head": "",
+    "chest": "",
+    "legs": "",
+    "feet": ""
+  },
+  "drop_chance": 0.8
+}

@@ -1,0 +1,12 @@
+{
+  "profession": "minecraft:nitwit",
+  "equipment": {
+    "mainhand": "minecraft:stone_sword",
+    "offhand": "",
+    "head": "",
+    "chest": "",
+    "legs": "",
+    "feet": ""
+  },
+  "drop_chance": 0.1
+}
