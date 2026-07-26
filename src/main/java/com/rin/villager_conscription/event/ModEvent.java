@@ -8,7 +8,8 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 
 @EventBusSubscriber(modid = "villager_conscription")
 public class ModEvent {
-    private ModEvent() {}
+    private ModEvent() {
+    }
 
     @SubscribeEvent
     public static void onAddReloadListeners(AddReloadListenerEvent event) {

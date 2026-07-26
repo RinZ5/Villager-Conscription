@@ -23,9 +23,9 @@ public class ProfessionReloadListener extends SimpleJsonResourceReloadListener {
 
     @Override
     protected void apply(
-            Map<ResourceLocation, JsonElement> elements,
-            ResourceManager manager,
-            ProfilerFiller profiler
+        Map<ResourceLocation, JsonElement> elements,
+        ResourceManager manager,
+        ProfilerFiller profiler
     ) {
         GEAR_CONFIGS.clear();
 
